@@ -16,10 +16,10 @@ class RollingWindowSplit():
         self.start_date = start_date
 
         # If these are specified, check they belong to the right type. 
-        if (train_size is not None) & (not isinstance(train_size, datetime.timedelta)):
-            raise TypeError('train_size should be datetime.timedelta')
-        if (test_size is not None ) & (not isinstance(test_size, datetime.timedelta)):
-            raise TypeError('test_size should be datetime.timedelta')
+        #if (train_size is not None) & (not isinstance(train_size, datetime.timedelta)):
+        #    raise TypeError('train_size should be datetime.timedelta')
+        #if (test_size is not None ) & (not isinstance(test_size, datetime.timedelta)):
+        #    raise TypeError('test_size should be datetime.timedelta')
 
 
     def split(self, X, y=None, timestamps=None):
