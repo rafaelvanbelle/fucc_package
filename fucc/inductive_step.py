@@ -1,5 +1,5 @@
 from multiprocessing import Pool
-
+import pandas as pd
 
 def calculate_average_embedding(df_before_TX_index, embeddings, dict_node=None):
     # Get an average transaction embedding (for the worst case scenario)
