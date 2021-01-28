@@ -1,8 +1,10 @@
 from multiprocessing import Pool
 import pandas as pd
 from functools import partial
-
-haha
+import numpy as np
+from tqdm import tqdm
+from sklearn.preprocessing import MinMaxScaler
+import random
 
 def calculate_average_embedding(df_before_TX_index, embeddings, dict_node=None):
     # Get an average transaction embedding (for the worst case scenario)
@@ -85,7 +87,7 @@ def inductive_nn_chunk(df_today, df_before_TX_index ,embeddings, G, average_embe
             dist = np.linalg.norm(df_merchant_normalized[:-1] - df_merchant_normalized[-1], axis=1)
             nearest_neighbor_merchant = df_merchant.iloc[np.argmin(dist)].name
             if dict_node:
-                embedding_nn_cardholder = embeddings[str(dict_node[str(nearest_neighbor_merchant)])]
+                embedding_nn_merchant = embeddings[str(dict_node[str(nearest_neighbor_merchant)])]
             else:
                 embedding_nn_merchant = embeddings[str(nearest_neighbor_merchant)]
 
