@@ -22,6 +22,9 @@ def calculate_average_embedding(df_before_TX_index, embeddings, dict_node=None):
 
 
 def inductive_nn(df_today, df_before, embeddings, G, workers, transaction_node_features, dict_node=None):
+
+    
+
     
     df_before_TX_index = df_before.set_index('TX_ID')
     
