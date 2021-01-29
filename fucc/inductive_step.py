@@ -7,6 +7,17 @@ from sklearn.preprocessing import MinMaxScaler
 import random
 
 def calculate_average_embedding(df_before_TX_index, embeddings, dict_node=None):
+    """[summary]
+
+    Args:
+        df_before_TX_index ([type]): [description]
+        embeddings ([type]): [description]
+        dict_node ([type], optional): [description]. Defaults to None.
+
+    Returns:
+        [type]: [description]
+    """
+    
     # Get an average transaction embedding (for the worst case scenario)
     df_embeddings = dict()
     for i, row in df_before_TX_index.iterrows():
@@ -22,12 +33,23 @@ def calculate_average_embedding(df_before_TX_index, embeddings, dict_node=None):
 
 
 def inductive_nn(df_today, df_before, embeddings, G, workers, transaction_node_features, dict_node=None):
+    """[summary]
 
-    
+    Args:
+        df_today ([type]): [description]
+        df_before ([type]): [description]
+        embeddings ([type]): [description]
+        G ([type]): [description]
+        workers ([type]): [description]
+        transaction_node_features ([type]): [description]
+        dict_node ([type], optional): [description]. Defaults to None.
 
-    
+    Returns:
+        [type]: [description]
+    """
+
+
     df_before_TX_index = df_before.set_index('TX_ID')
-    
     average_embedding = calculate_average_embedding(df_before_TX_index, embeddings, dict_node)
 
     
@@ -38,6 +60,20 @@ def inductive_nn(df_today, df_before, embeddings, G, workers, transaction_node_f
     return r
 
 def inductive_nn_chunk(df_today, df_before_TX_index ,embeddings, G, average_embedding, transaction_node_features, dict_node=None):
+    """[summary]
+
+    Args:
+        df_today ([type]): [description]
+        df_before_TX_index ([type]): [description]
+        embeddings ([type]): [description]
+        G ([type]): [description]
+        average_embedding ([type]): [description]
+        transaction_node_features ([type]): [description]
+        dict_node ([type], optional): [description]. Defaults to None.
+
+    Returns:
+        [type]: [description]
+    """
 
     #Create a container for the new embeddings
     new_embeddings = dict()
