@@ -123,7 +123,7 @@ def inductive_step(edges, historical_edges, suspicion_scores, G, t):
         **{'SC_TX_'+t: 0, 'SC_MC_'+t: 0, 'SC_CC_'+t: 0})
 
     # get suspicion scores
-    for i, edge in tqdm(edges.iterrows(), total=edges.shape[0]):
+    for i, edge in edges.iterrows():
     
         client = edge.iloc[0]
         merchant = edge.iloc[1]
@@ -193,7 +193,7 @@ def postprocessing_historical_edges(historical_edges, suspicion_scores, t):
         **{'SC_TX_'+t: 0, 'SC_MC_'+t: 0, 'SC_CC_'+t: 0})
 
     # get suspicion scores
-    for i, edge in tqdm(historical_edges.iterrows(), total=historical_edges.shape[0]):
+    for i, edge in historical_edges.iterrows():
 
         client = edge.iloc[0]
         merchant = edge.iloc[1]
