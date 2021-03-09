@@ -64,3 +64,12 @@ class RollingWindowSplit():
                     indices[(timestamps > start_time) & (timestamps <= (start_time + self.test_size))])
                 # Update start_time
                 start_time += self.test_size
+
+    def number_of_splits(self, timestamps=None):
+        """Calculate the number of splits possible within the given dataset
+
+        Args:
+            timestamps ([type], optional): [description]. Defaults to None.
+        """
+
+        return np.floor((timestamps[-1] - self.start_date) / self.test_size)
