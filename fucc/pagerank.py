@@ -24,7 +24,7 @@ def get_pagerank_suspicion_scores(data, t,
                                   lambd, 
                                   alpha=0.85, 
                                   n_jobs=5,
-                                  personalization_nodes):
+                                  personalization_nodes=None):
     """[calculcate pagerank suspicion scores for every rows in data]
 
     Arguments:
@@ -35,6 +35,8 @@ def get_pagerank_suspicion_scores(data, t,
         lambd {float} -- [description] (default: {0.03})
         alpha {float} -- [description] (default: {0.85})
         n_jobs {int} -- [description] (default: {5})
+        personalization_nodes {list} -- a list of nodes that will be used in the personalization vector. If None is supplied, all fraudulent nodes
+        will be used in the personalization vector. 
 
     Returns:
         [dict] -- [description]
