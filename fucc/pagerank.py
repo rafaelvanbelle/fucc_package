@@ -23,7 +23,8 @@ output_folder = os.path.join(data_path, 'pagerank/pagerank_output/')
 def get_pagerank_suspicion_scores(data, t, 
                                   lambd, 
                                   alpha=0.85, 
-                                  n_jobs=5):
+                                  n_jobs=5,
+                                  personalization_nodes):
     """[calculcate pagerank suspicion scores for every rows in data]
 
     Arguments:
@@ -66,7 +67,13 @@ def get_pagerank_suspicion_scores(data, t,
     # Make a new weights dictionary with TX_ID as key
     logging.info('Personalization')
     weights_data_tx_id_key = dict(zip(data.TX_ID, weights_data.values()))
-    personalization = \
+
+    if personalization_nodes:
+        subset = data.loc[personalization_nodes]
+        personalization = \
+                        {dc['TX_ID']: weights_data_tx_id_key.get(dc['TX_ID']) for dc in subset[subset.TX_FRAUD == True].to_dict(orient='records')}
+    else:
+        personalization = \
                         {dc['TX_ID']: weights_data_tx_id_key.get(dc['TX_ID']) for dc in data[data.TX_FRAUD == True].to_dict(orient='records')}
     print(G.number_of_nodes())
     print(len(personalization))
