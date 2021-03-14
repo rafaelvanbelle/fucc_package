@@ -78,8 +78,7 @@ def get_pagerank_suspicion_scores(data, t,
                             [1 for key in data.index])))
 
         logging.info('Personalization')
-        weights_data_tx_id_key = dict(zip(data.TX_ID, 1))
-        print(weights_data_tx_id_key)
+        weights_data_tx_id_key = dict(zip(data.TX_ID, [1 for entry in data.TX_ID]))
     
     logging.info('Building graph {}'.format(t))
     G = nx.Graph()
