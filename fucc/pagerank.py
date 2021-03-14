@@ -24,7 +24,8 @@ def get_pagerank_suspicion_scores(data, t,
                                   lambd, 
                                   alpha=0.85, 
                                   n_jobs=5,
-                                  personalization_nodes=None):
+                                  personalization_nodes=None,
+                                  weighted = True):
     """[calculcate pagerank suspicion scores for every rows in data]
 
     Arguments:
@@ -45,30 +46,44 @@ def get_pagerank_suspicion_scores(data, t,
 
     logging.info("Building network")
 
-    weights_data = calculate_edge_weights(data, t=t, lambd=lambd)
+
+    #weights_data = calculate_edge_weights(data, t=t, lambd=lambd)
     suspicion_scores = dict()
     weights_data_tx_id_key = dict()
 
-    logging.info('Calculating edge weights for {}'.format(t))
-    weights_data = calculate_edge_weights(data, t=t, lambd=lambd)
+    if weighted:
+        logging.info('Calculating edge weights for {}'.format(t))
+        weights_data = calculate_edge_weights(data, t=t, lambd=lambd)
 
-    weighted_edgelist = list(zip(data.CARD_PAN_ID, data.TX_ID,
-                                 [weights_data.get(key) for key in data.index])) + \
-                        list((zip(data.TERM_MIDUID, data.TX_ID,
-                                [weights_data.get(key) for key in data.index])))
+        weighted_edgelist = list(zip(data.CARD_PAN_ID, data.TX_ID,
+                                    [weights_data.get(key) for key in data.index])) + \
+                            list((zip(data.TERM_MIDUID, data.TX_ID,
+                                    [weights_data.get(key) for key in data.index])))
 
+        
+        # determine starting vector
+        # starting_vector = ... Has to be time-weighted (See p.155) - update: In the APATE paper this vector e_0 is a random vector. The personalization vector has to be time-weighted, see below.
+        # I will not specifiy a non-default e_0 vector (which is referred to as nstart in networkx)
+
+        # personalization
+        # Make a new weights dictionary with TX_ID as key
+        logging.info('Personalization')
+        weights_data_tx_id_key = dict(zip(data.TX_ID, weights_data.values()))
+
+    else:
+        # Weighted edgelist with all 1
+        weighted_edgelist = list(zip(data.CARD_PAN_ID, data.TX_ID,
+                            [1 for key in data.index])) + \
+                    list((zip(data.TERM_MIDUID, data.TX_ID,
+                            [1 for key in data.index])))
+
+        logging.info('Personalization')
+        weights_data_tx_id_key = dict(zip(data.TX_ID, 1))
+        print(weights_data_tx_id_key)
+    
     logging.info('Building graph {}'.format(t))
     G = nx.Graph()
     G.add_weighted_edges_from(weighted_edgelist)
-    
-    # determine starting vector
-    # starting_vector = ... Has to be time-weighted (See p.155) - update: In the APATE paper this vector e_0 is a random vector. The personalization vector has to be time-weighted, see below.
-    # I will not specifiy a non-default e_0 vector (which is referred to as nstart in networkx)
-
-    # personalization
-    # Make a new weights dictionary with TX_ID as key
-    logging.info('Personalization')
-    weights_data_tx_id_key = dict(zip(data.TX_ID, weights_data.values()))
 
     if personalization_nodes:
         subset = data.loc[personalization_nodes]
