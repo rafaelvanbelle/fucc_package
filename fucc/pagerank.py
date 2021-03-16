@@ -20,12 +20,13 @@ files = glob.glob(os.path.join(data_path,'pagerank/pagerank_input/data_pagerank_
 output_folder = os.path.join(data_path, 'pagerank/pagerank_output/')
 
 
-def get_pagerank_suspicion_scores(data, t, 
+def get_pagerank_suspicion_scores(data, 
                                   lambd, 
                                   alpha=0.85, 
                                   n_jobs=5,
                                   personalization_nodes=None,
-                                  weighted = True):
+                                  weighted = True,
+                                  t = None):
     """[calculcate pagerank suspicion scores for every rows in data]
 
     Arguments:
