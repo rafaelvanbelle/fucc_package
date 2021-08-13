@@ -2,6 +2,7 @@ README.md
 setup.py
 fucc/__init__.py
 fucc/inductive_step.py
+fucc/metrics.py
 fucc/model_selection.py
 fucc/pagerank.py
 fucc/utils.py
