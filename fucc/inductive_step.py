@@ -381,7 +381,7 @@ def inductive_pooling(df, embeddings, G, workers, gamma=1000, dict_node=None, av
 		
 			cardholder_neighbors = list(G.neighbors(cardholder))
 			
-			pooled_embedding = get_pooled_embedding(cardholder_neighbors)
+			pooled_embedding = get_pooled_embedding(cardholder_neighbors, embeddings)
 			
 			new_embeddings[transaction] = pooled_embedding
 			stats['cardholder'] += 1
@@ -391,7 +391,7 @@ def inductive_pooling(df, embeddings, G, workers, gamma=1000, dict_node=None, av
 		
 			merchant_neighbors = list(G.neighbors(merchant))
 			
-			pooled_embedding = get_pooled_embedding(merchant_neighbors)
+			pooled_embedding = get_pooled_embedding(merchant_neighbors, embeddings)
 			
 			new_embeddings[transaction] = pooled_embedding
 			stats['merchant'] += 1
