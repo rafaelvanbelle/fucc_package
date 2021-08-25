@@ -345,3 +345,148 @@ def inductive_chunk(df_today, df_before_TX_index ,embeddings, G, average_embeddi
         
             
     return new_embeddings, stats, setting_dict, second_embeddings
+	
+	def inductive_pooling(df_today, df_before, embeddings, G, workers, transaction_node_features, dict_node=None, average_embedding=True):
+		
+	    """[summary]
+	
+	    Args:
+	        df_today ([type]): [description]
+	        df_before_TX_index ([type]): [description]
+	        embeddings ([type]): [description]
+	        G ([type]): [description]
+	        average_embedding ([type]): [description]
+	        transaction_node_features ([type]): [description]
+	        dict_node ([type], optional): [description]. Defaults to None.
+	
+	    Returns:
+	        [type]: [description]
+	    """
+	
+	    #Create a container for the new embeddings
+	    new_embeddings = dict()
+	    #If both cardholder and merchant have been seen before but no transaction was made, we will save both cardholder and merchant embedding
+	    second_embeddings = dict()
+	
+	    #Keep track of the statistics
+	    stats = {'both':0, 'cardholder':0, 'merchant':0, 'none':0, 'most_recent':0}
+	    setting_dict = {}
+	
+	    for transaction, transaction_row in tqdm(df_today.iterrows(), total=df_today.shape[0]):
+	        mms = MinMaxScaler()
+	        cardholder = transaction_row.CARD_PAN_ID
+	        merchant = transaction_row.TERM_MIDUID
+	        
+	        
+	        most_recent_transaction = None
+	        embedding_most_recent_transaction = None
+	
+	        if G.has_node(cardholder) & G.has_node(merchant):
+	            mutual_neighbors = list(set(G.neighbors(cardholder)).intersection(set(G.neighbors(merchant))))
+	            if len(mutual_neighbors) > 0:
+	                # Use dataframe with TX_ID on index (to speed up retrieval of transaction rows)
+	                df_mutual = df_before_TX_index.loc[mutual_neighbors]
+	                # Sort rows on TX_DATETIME
+	                df_mutual = df_mutual.sort_values(by='TX_DATETIME', ascending=True)
+	                # most recent transaction
+	                most_recent_transaction = df_mutual.iloc[-1].name
+	
+	            # If there is a dict_node, we need to translate the node into the original label
+	                if dict_node:
+	                    embedding_most_recent_transaction = embeddings.loc[str(dict_node[str(most_recent_transaction)])]
+	                else:
+	                    embedding_most_recent_transaction = embeddings.loc[str(most_recent_transaction)]
+	
+	                new_embeddings[transaction] = embedding_most_recent_transaction
+	                stats['most_recent'] += 1
+	                setting_dict[transaction] = 'most_recent'
+	
+	            else:
+	                # Set this value to avoid next if statement from executing
+	                most_recent_transaction = 1
+	
+	                # get most recent cardholder tx
+	                cardholder_neighbors = list(G.neighbors(cardholder))
+	                df_cardholder_neighbors = df_before_TX_index.loc[cardholder_neighbors]
+	                # Sort rows on TX_DATETIME
+	                df_cardholder_neighbors = df_cardholder_neighbors.sort_values(by='TX_DATETIME', ascending=True)
+	                # most recent transaction
+	                most_recent_transaction_cardholder = df_cardholder_neighbors.iloc[-1].name
+	
+	                # get cardholder embedding
+	                if dict_node:
+	                    embedding_cardholder = embeddings.loc[str(dict_node[str(most_recent_transaction_cardholder)])]
+	                else:
+	                    embedding_cardholder = embeddings.loc[str(most_recent_transaction_cardholder)]
+	
+	                
+	                # get most recent merchant tx
+	                merchant_neighbors = list(G.neighbors(merchant))
+	                df_merchant_neighbors = df_before_TX_index.loc[merchant_neighbors]
+	                # Sort rows on TX_DATETIME
+	                df_merchant_neighbors = df_merchant_neighbors.sort_values(by='TX_DATETIME', ascending=True)
+	                # most recent transaction
+	                most_recent_transaction_merchant = df_merchant_neighbors.iloc[-1].name
+	
+	                # get merchant embedding 
+	                if dict_node:
+	                    embedding_merchant = embeddings.loc[str(dict_node[str(most_recent_transaction_merchant)])]
+	                else:
+	                    embedding_merchant = embeddings.loc[str(most_recent_transaction_merchant)]
+	
+	                new_embeddings[transaction] = embedding_cardholder
+	                second_embeddings[transaction] = embedding_merchant
+	                
+	                stats['both'] += 1
+	                setting_dict[transaction] = 'both'
+	
+	        if most_recent_transaction == None:
+	            if G.has_node(cardholder):
+	
+	                cardholder_neighbors = list(G.neighbors(cardholder))
+	                df_cardholder_neighbors = df_before_TX_index.loc[cardholder_neighbors]
+	                # Sort rows on TX_DATETIME
+	                df_cardholder_neighbors = df_cardholder_neighbors.sort_values(by='TX_DATETIME', ascending=True)
+	                # most recent transaction
+	                most_recent_transaction_cardholder = df_cardholder_neighbors.iloc[-1].name
+	
+	
+	
+	                if dict_node:
+	                    embedding_cardholder = embeddings.loc[str(dict_node[str(most_recent_transaction_cardholder)])]
+	                else:
+	                    embedding_cardholder = embeddings.loc[str(most_recent_transaction_cardholder)]
+	
+	                new_embeddings[transaction] = embedding_cardholder
+	                stats['cardholder'] += 1
+	                setting_dict[transaction] = 'cardholder'
+	
+	            elif G.has_node(merchant):
+	
+	                merchant_neighbors = list(G.neighbors(merchant))
+	                df_merchant_neighbors = df_before_TX_index.loc[merchant_neighbors]
+	                # Sort rows on TX_DATETIME
+	                df_merchant_neighbors = df_merchant_neighbors.sort_values(by='TX_DATETIME', ascending=True)
+	                # most recent transaction
+	                most_recent_transaction_merchant = df_merchant_neighbors.iloc[-1].name
+	
+	
+	
+	                if dict_node:
+	                    embedding_merchant = embeddings.loc[str(dict_node[str(most_recent_transaction_merchant)])]
+	                else:
+	                    embedding_merchant = embeddings.loc[str(most_recent_transaction_merchant)]
+	
+	                new_embeddings[transaction] = embedding_merchant
+	                stats['merchant'] += 1
+	                setting_dict[transaction] = 'merchant'
+	            
+	            else:
+	                new_embeddings[transaction] = average_embedding
+	                stats['none'] += 1
+	                setting_dict[transaction] = 'none'
+	
+	        
+	            
+					return new_embeddings, stats, setting_dict, second_embeddings
+			
