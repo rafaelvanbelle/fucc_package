@@ -392,74 +392,34 @@ def inductive_chunk(df_today, df_before_TX_index ,embeddings, G, average_embeddi
 	                stats['most_recent'] += 1
 	                setting_dict[transaction] = 'most_recent'
 	
-	            else:
-	                # Set this value to avoid next if statement from executing
-	                most_recent_transaction = 1
+			elif G.has_node(cardholder):
 	
-	                # get most recent cardholder tx
-	                cardholder_neighbors = list(G.neighbors(cardholder))
-	                df_cardholder_neighbors = df_before_TX_index.loc[cardholder_neighbors]
-	                # Sort rows on TX_DATETIME
-	                df_cardholder_neighbors = df_cardholder_neighbors.sort_values(by='TX_DATETIME', ascending=True)
-	                # most recent transaction
-	                most_recent_transaction_cardholder = df_cardholder_neighbors.iloc[-1].name
+                cardholder_neighbors = list(G.neighbors(cardholder))
+                
+				pooled_embedding = get_pooled_embedding(cardholder_neighbors)
+                
+                new_embeddings[transaction] = pooled_embedding
+                stats['cardholder'] += 1
+                setting_dict[transaction] = 'cardholder'
 	
-	                # get cardholder embedding
-	                if dict_node:
-	                    embedding_cardholder = embeddings.loc[str(dict_node[str(most_recent_transaction_cardholder)])]
-	                else:
-	                    embedding_cardholder = embeddings.loc[str(most_recent_transaction_cardholder)]
+			elif G.has_node(merchant):
 	
-	                
-	                # get most recent merchant tx
-	                merchant_neighbors = list(G.neighbors(merchant))
-	                df_merchant_neighbors = df_before_TX_index.loc[merchant_neighbors]
-	                # Sort rows on TX_DATETIME
-	                df_merchant_neighbors = df_merchant_neighbors.sort_values(by='TX_DATETIME', ascending=True)
-	                # most recent transaction
-	                most_recent_transaction_merchant = df_merchant_neighbors.iloc[-1].name
-	
-	                # get merchant embedding 
-	                if dict_node:
-	                    embedding_merchant = embeddings.loc[str(dict_node[str(most_recent_transaction_merchant)])]
-	                else:
-	                    embedding_merchant = embeddings.loc[str(most_recent_transaction_merchant)]
-	
-	                new_embeddings[transaction] = embedding_cardholder
-	                second_embeddings[transaction] = embedding_merchant
-	                
-	                stats['both'] += 1
-	                setting_dict[transaction] = 'both'
-	
-	        if most_recent_transaction == None:
-	            if G.has_node(cardholder):
-	
-	                cardholder_neighbors = list(G.neighbors(cardholder))
-	                
-					pooled_embedding = get_pooled_embedding(cardholder_neighbors)
-	                
-	                new_embeddings[transaction] = pooled_embedding
-	                stats['cardholder'] += 1
-	                setting_dict[transaction] = 'cardholder'
-	
-	            elif G.has_node(merchant):
-	
-	                merchant_neighbors = list(G.neighbors(merchant))
-					
-					pooled_embedding = get_pooled_embedding(merchant_neighbors)
-	
-	                new_embeddings[transaction] = pooled_embedding
-	                stats['merchant'] += 1
-	                setting_dict[transaction] = 'merchant'
+                merchant_neighbors = list(G.neighbors(merchant))
+				
+				pooled_embedding = get_pooled_embedding(merchant_neighbors)
+
+                new_embeddings[transaction] = pooled_embedding
+                stats['merchant'] += 1
+                setting_dict[transaction] = 'merchant'
 	            
-	            else:
-	                new_embeddings[transaction] = average_embedding
-	                stats['none'] += 1
-	                setting_dict[transaction] = 'none'
+			else:
+                new_embeddings[transaction] = average_embedding
+                stats['none'] += 1
+                setting_dict[transaction] = 'none'
 	
 	        
 	            
-					return new_embeddings, stats, setting_dict, second_embeddings
+		return new_embeddings, stats, setting_dict
 			
 					
 	def get_pooled_embedding(neighbors):
