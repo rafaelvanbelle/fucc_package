@@ -346,7 +346,7 @@ def inductive_chunk(df_today, df_before_TX_index ,embeddings, G, average_embeddi
             
     return new_embeddings, stats, setting_dict, second_embeddings
 	
-def inductive_pooling(df, embeddings, G, workers, transaction_node_features, gamma=1000, dict_node=None, average_embedding=True):
+def inductive_pooling(df, embeddings, G, workers, gamma=1000, dict_node=None, average_embedding=True):
 	
 	#Create a container for the new embeddings
 	new_embeddings = dict()
@@ -408,7 +408,7 @@ def inductive_pooling(df, embeddings, G, workers, transaction_node_features, gam
 			return new_embeddings, stats, setting_dict
 			
 					
-def get_pooled_embedding(neighbors):
+def get_pooled_embedding(neighbors, embeddings):
 	
 	embeddings_to_pool = embeddings.loc[neighbors]
 	most_recent_embeddings_to_pool = embeddings_to_pool.iloc[-min(gamma, embeddings_to_pool.shape[0]):]
