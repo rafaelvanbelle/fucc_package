@@ -346,7 +346,7 @@ def inductive_chunk(df_today, df_before_TX_index ,embeddings, G, average_embeddi
             
     return new_embeddings, stats, setting_dict, second_embeddings
 	
-	def inductive_pooling(df_today, df_before, embeddings, G, workers, transaction_node_features, dict_node=None, average_embedding=True):
+	def inductive_pooling(df, embeddings, G, workers, transaction_node_features, gamma=1000, dict_node=None, average_embedding=True):
 		
 	    """[summary]
 	
@@ -365,15 +365,13 @@ def inductive_chunk(df_today, df_before_TX_index ,embeddings, G, average_embeddi
 	
 	    #Create a container for the new embeddings
 	    new_embeddings = dict()
-	    #If both cardholder and merchant have been seen before but no transaction was made, we will save both cardholder and merchant embedding
-	    second_embeddings = dict()
 	
 	    #Keep track of the statistics
 	    stats = {'both':0, 'cardholder':0, 'merchant':0, 'none':0, 'most_recent':0}
 	    setting_dict = {}
 	
-	    for transaction, transaction_row in tqdm(df_today.iterrows(), total=df_today.shape[0]):
-	        mms = MinMaxScaler()
+	    for transaction, transaction_row in tqdm(df.iterrows(), total=df.shape[0]):
+	        
 	        cardholder = transaction_row.CARD_PAN_ID
 	        merchant = transaction_row.TERM_MIDUID
 	        
@@ -385,19 +383,12 @@ def inductive_chunk(df_today, df_before_TX_index ,embeddings, G, average_embeddi
 	            mutual_neighbors = list(set(G.neighbors(cardholder)).intersection(set(G.neighbors(merchant))))
 	            if len(mutual_neighbors) > 0:
 	                # Use dataframe with TX_ID on index (to speed up retrieval of transaction rows)
-	                df_mutual = df_before_TX_index.loc[mutual_neighbors]
-	                # Sort rows on TX_DATETIME
-	                df_mutual = df_mutual.sort_values(by='TX_DATETIME', ascending=True)
-	                # most recent transaction
-	                most_recent_transaction = df_mutual.iloc[-1].name
+	                embeddings_mutual_neighbors = embeddings.loc[mutual_neighbors] 
+	                
+					# most recent transaction
+					most_recent_embedding_mutual_neighbor = embeddings_mutual_neighbors.iloc[-1]
 	
-	            # If there is a dict_node, we need to translate the node into the original label
-	                if dict_node:
-	                    embedding_most_recent_transaction = embeddings.loc[str(dict_node[str(most_recent_transaction)])]
-	                else:
-	                    embedding_most_recent_transaction = embeddings.loc[str(most_recent_transaction)]
-	
-	                new_embeddings[transaction] = embedding_most_recent_transaction
+	                new_embeddings[transaction] = most_recent_embedding_mutual_neighbor
 	                stats['most_recent'] += 1
 	                setting_dict[transaction] = 'most_recent'
 	
@@ -444,40 +435,20 @@ def inductive_chunk(df_today, df_before_TX_index ,embeddings, G, average_embeddi
 	            if G.has_node(cardholder):
 	
 	                cardholder_neighbors = list(G.neighbors(cardholder))
-	                df_cardholder_neighbors = df_before_TX_index.loc[cardholder_neighbors]
-	                # Sort rows on TX_DATETIME
-	                df_cardholder_neighbors = df_cardholder_neighbors.sort_values(by='TX_DATETIME', ascending=True)
-	                # most recent transaction
-	                most_recent_transaction_cardholder = df_cardholder_neighbors.iloc[-1].name
-	
-	
-	
-	                if dict_node:
-	                    embedding_cardholder = embeddings.loc[str(dict_node[str(most_recent_transaction_cardholder)])]
-	                else:
-	                    embedding_cardholder = embeddings.loc[str(most_recent_transaction_cardholder)]
-	
-	                new_embeddings[transaction] = embedding_cardholder
+	                
+					pooled_embedding = get_pooled_embedding(cardholder_neighbors)
+	                
+	                new_embeddings[transaction] = pooled_embedding
 	                stats['cardholder'] += 1
 	                setting_dict[transaction] = 'cardholder'
 	
 	            elif G.has_node(merchant):
 	
 	                merchant_neighbors = list(G.neighbors(merchant))
-	                df_merchant_neighbors = df_before_TX_index.loc[merchant_neighbors]
-	                # Sort rows on TX_DATETIME
-	                df_merchant_neighbors = df_merchant_neighbors.sort_values(by='TX_DATETIME', ascending=True)
-	                # most recent transaction
-	                most_recent_transaction_merchant = df_merchant_neighbors.iloc[-1].name
+					
+					pooled_embedding = get_pooled_embedding(merchant_neighbors)
 	
-	
-	
-	                if dict_node:
-	                    embedding_merchant = embeddings.loc[str(dict_node[str(most_recent_transaction_merchant)])]
-	                else:
-	                    embedding_merchant = embeddings.loc[str(most_recent_transaction_merchant)]
-	
-	                new_embeddings[transaction] = embedding_merchant
+	                new_embeddings[transaction] = pooled_embedding
 	                stats['merchant'] += 1
 	                setting_dict[transaction] = 'merchant'
 	            
@@ -490,3 +461,15 @@ def inductive_chunk(df_today, df_before_TX_index ,embeddings, G, average_embeddi
 	            
 					return new_embeddings, stats, setting_dict, second_embeddings
 			
+					
+	def get_pooled_embedding(neighbors):
+		
+		embeddings_to_pool = embeddings.loc[neighbors]
+	    
+	    most_recent_embeddings_to_pool = embeddings_to_pool.iloc[-min(gamma, embeddings_to_pool.shape[0]):]
+		
+		pooled_embedding = pd.DataFrame(most_recent_embeddings_to_pool.mean()).transpose()
+	    
+	    return pooled_embedding
+	    
+		
