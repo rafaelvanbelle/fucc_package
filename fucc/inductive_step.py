@@ -346,90 +346,75 @@ def inductive_chunk(df_today, df_before_TX_index ,embeddings, G, average_embeddi
             
     return new_embeddings, stats, setting_dict, second_embeddings
 	
-	def inductive_pooling(df, embeddings, G, workers, transaction_node_features, gamma=1000, dict_node=None, average_embedding=True):
-		
-	    """[summary]
+def inductive_pooling(df, embeddings, G, workers, transaction_node_features, gamma=1000, dict_node=None, average_embedding=True):
 	
-	    Args:
-	        df_today ([type]): [description]
-	        df_before_TX_index ([type]): [description]
-	        embeddings ([type]): [description]
-	        G ([type]): [description]
-	        average_embedding ([type]): [description]
-	        transaction_node_features ([type]): [description]
-	        dict_node ([type], optional): [description]. Defaults to None.
+	#Create a container for the new embeddings
+	new_embeddings = dict()
 	
-	    Returns:
-	        [type]: [description]
-	    """
+	#Keep track of the statistics
+	stats = {'both':0, 'cardholder':0, 'merchant':0, 'none':0, 'most_recent':0}
+	setting_dict = {}
 	
-	    #Create a container for the new embeddings
-	    new_embeddings = dict()
+	for transaction, transaction_row in tqdm(df.iterrows(), total=df.shape[0]):
+	    
+	    cardholder = transaction_row.CARD_PAN_ID
+	    merchant = transaction_row.TERM_MIDUID
+	    
+	    
+	    most_recent_transaction = None
+	    embedding_most_recent_transaction = None
 	
-	    #Keep track of the statistics
-	    stats = {'both':0, 'cardholder':0, 'merchant':0, 'none':0, 'most_recent':0}
-	    setting_dict = {}
-	
-	    for transaction, transaction_row in tqdm(df.iterrows(), total=df.shape[0]):
-	        
-	        cardholder = transaction_row.CARD_PAN_ID
-	        merchant = transaction_row.TERM_MIDUID
-	        
-	        
-	        most_recent_transaction = None
-	        embedding_most_recent_transaction = None
-	
-	        if G.has_node(cardholder) & G.has_node(merchant):
-	            mutual_neighbors = list(set(G.neighbors(cardholder)).intersection(set(G.neighbors(merchant))))
-	            if len(mutual_neighbors) > 0:
-	                # Use dataframe with TX_ID on index (to speed up retrieval of transaction rows)
-	                embeddings_mutual_neighbors = embeddings.loc[mutual_neighbors] 
-	                
-					# most recent transaction
-					most_recent_embedding_mutual_neighbor = embeddings_mutual_neighbors.iloc[-1]
-	
-	                new_embeddings[transaction] = most_recent_embedding_mutual_neighbor
-	                stats['most_recent'] += 1
-	                setting_dict[transaction] = 'most_recent'
-	
-			elif G.has_node(cardholder):
-	
-                cardholder_neighbors = list(G.neighbors(cardholder))
-                
-				pooled_embedding = get_pooled_embedding(cardholder_neighbors)
-                
-                new_embeddings[transaction] = pooled_embedding
-                stats['cardholder'] += 1
-                setting_dict[transaction] = 'cardholder'
-	
-			elif G.has_node(merchant):
-	
-                merchant_neighbors = list(G.neighbors(merchant))
-				
-				pooled_embedding = get_pooled_embedding(merchant_neighbors)
-
-                new_embeddings[transaction] = pooled_embedding
-                stats['merchant'] += 1
-                setting_dict[transaction] = 'merchant'
+	    if G.has_node(cardholder) & G.has_node(merchant):
+	        mutual_neighbors = list(set(G.neighbors(cardholder)).intersection(set(G.neighbors(merchant))))
+	        if len(mutual_neighbors) > 0:
+	            # Use dataframe with TX_ID on index (to speed up retrieval of transaction rows)
+	            embeddings_mutual_neighbors = embeddings.loc[mutual_neighbors] 
 	            
-			else:
-                new_embeddings[transaction] = average_embedding
-                stats['none'] += 1
-                setting_dict[transaction] = 'none'
+				# most recent transaction
+				most_recent_embedding_mutual_neighbor = embeddings_mutual_neighbors.iloc[-1]
 	
+	            new_embeddings[transaction] = most_recent_embedding_mutual_neighbor
+	            stats['most_recent'] += 1
+	            setting_dict[transaction] = 'most_recent'
+	
+		elif G.has_node(cardholder):
+	
+	        cardholder_neighbors = list(G.neighbors(cardholder))
 	        
-	            
-		return new_embeddings, stats, setting_dict
+			pooled_embedding = get_pooled_embedding(cardholder_neighbors)
+	        
+	        new_embeddings[transaction] = pooled_embedding
+	        stats['cardholder'] += 1
+	        setting_dict[transaction] = 'cardholder'
+	
+		elif G.has_node(merchant):
+	
+	        merchant_neighbors = list(G.neighbors(merchant))
+			
+			pooled_embedding = get_pooled_embedding(merchant_neighbors)
+	
+	        new_embeddings[transaction] = pooled_embedding
+	        stats['merchant'] += 1
+	        setting_dict[transaction] = 'merchant'
+	        
+		else:
+	        new_embeddings[transaction] = average_embedding
+	        stats['none'] += 1
+	        setting_dict[transaction] = 'none'
+	
+	    
+	        
+	return new_embeddings, stats, setting_dict
 			
 					
-	def get_pooled_embedding(neighbors):
-		
-		embeddings_to_pool = embeddings.loc[neighbors]
-	    
-	    most_recent_embeddings_to_pool = embeddings_to_pool.iloc[-min(gamma, embeddings_to_pool.shape[0]):]
-		
-		pooled_embedding = pd.DataFrame(most_recent_embeddings_to_pool.mean()).transpose()
-	    
-	    return pooled_embedding
-	    
-		
+def get_pooled_embedding(neighbors):
+	
+	embeddings_to_pool = embeddings.loc[neighbors]
+    
+    most_recent_embeddings_to_pool = embeddings_to_pool.iloc[-min(gamma, embeddings_to_pool.shape[0]):]
+	
+	pooled_embedding = pd.DataFrame(most_recent_embeddings_to_pool.mean()).transpose()
+    
+    return pooled_embedding
+    
+	
