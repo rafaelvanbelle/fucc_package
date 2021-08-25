@@ -405,7 +405,7 @@ def inductive_pooling(df, embeddings, G, workers, gamma=1000, dict_node=None, av
 			
 			
 	
-			return new_embeddings, stats, setting_dict
+	return new_embeddings, stats, setting_dict
 			
 					
 def get_pooled_embedding(neighbors, embeddings, gamma):
