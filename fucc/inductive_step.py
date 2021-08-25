@@ -404,17 +404,16 @@ def inductive_pooling(df, embeddings, G, workers, transaction_node_features, gam
 			
 			
 			
-	return new_embeddings, stats, setting_dict
+	
+			return new_embeddings, stats, setting_dict
 			
 					
 def get_pooled_embedding(neighbors):
 	
 	embeddings_to_pool = embeddings.loc[neighbors]
-    
-    most_recent_embeddings_to_pool = embeddings_to_pool.iloc[-min(gamma, embeddings_to_pool.shape[0]):]
+	most_recent_embeddings_to_pool = embeddings_to_pool.iloc[-min(gamma, embeddings_to_pool.shape[0]):]
 	
 	pooled_embedding = pd.DataFrame(most_recent_embeddings_to_pool.mean()).transpose()
-    
-    return pooled_embedding
-    
+	
+	return pooled_embedding
 	
