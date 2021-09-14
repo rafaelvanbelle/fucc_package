@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import f1_score, confusion_matrix, precision_recall_curve, average_precision_score, PrecisionRecallDisplay
 import numpy as np
 import mlflow
-#from tqdm import tqdm
 
 def get_mlflow():
     return mlflow.get_tracking_uri()
