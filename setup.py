@@ -4,8 +4,8 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="fucc", # Replace with your own username
-    version="0.0.1",
+    name="fucc", 
+    version="0.0.2",
     author="Rafael Van Belle",
     author_email="rafael@gmail.com",
     description="Fraudulent Use of Credit Card",
