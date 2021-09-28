@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="fucc", 
-    version="0.0.2",
+    version="0.0.3",
     author="Rafael Van Belle",
     author_email="rafael@gmail.com",
     description="Fraudulent Use of Credit Card",
@@ -14,7 +14,14 @@ setuptools.setup(
     url="https://github.com/rafaelvanbelle/fucc_package",
     packages=setuptools.find_packages(),
     install_requires=[
-          'scikit-learn',
+          'scikit-learn', 
+          'pandas', 
+          'tqdm', 
+          'scikitplot', 
+          'mlflow', 
+          'matplotlib', 
+          'networkx', 
+          'dateparser'
       ],
     classifiers=[
         "Programming Language :: Python :: 3", 

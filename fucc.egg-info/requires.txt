@@ -1,1 +1,8 @@
 scikit-learn
+pandas
+tqdm
+scikitplot
+mlflow
+matplotlib
+networkx
+dateparser
