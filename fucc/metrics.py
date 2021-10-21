@@ -3,10 +3,10 @@ from scikitplot.helpers import cumulative_gain_curve
 import matplotlib.pyplot as plt
 from sklearn.metrics import f1_score, confusion_matrix, precision_recall_curve, average_precision_score, PrecisionRecallDisplay
 import numpy as np
-import mlflow
+#import mlflow
 
-def get_mlflow():
-    return mlflow.get_tracking_uri()
+#def get_mlflow():
+#    return mlflow.get_tracking_uri()
 
 def plot_cumulative_gain(y_true, y_proba, title_fontsize=15, text_fontsize=10):
     # Compute Cumulative Gain Curves
