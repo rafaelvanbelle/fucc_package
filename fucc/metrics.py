@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import f1_score, confusion_matrix, precision_recall_curve, average_precision_score, PrecisionRecallDisplay
 import numpy as np
 import mlflow
-#from tqdm import tqdm
 
 def get_mlflow():
     return mlflow.get_tracking_uri()
@@ -116,7 +115,7 @@ def get_true_positives_at(y_true, y_pred_proba, number_of_positives = 1000):
     cm = confusion_matrix(y_true, y_pred_proba>=threshold)
     return cm[1,1]
     
-def log_performance(y_true, y_pred_proba, images_path, name,  log_with_mlflow=False, number_of_positives=1000):
+def log_performance(y_true, y_pred_proba, images_path, name,  log_with_mlflow=False, number_of_positives=300):
 
     # plot ap curve
     fig = plot_ap(y_true, y_pred_proba)
@@ -166,4 +165,4 @@ def log_performance(y_true, y_pred_proba, images_path, name,  log_with_mlflow=Fa
     # catched@1000
     positives_at = get_true_positives_at(y_true, y_pred_proba, number_of_positives)
     if log_with_mlflow:
-        mlflow.log_metric('catched_1000', positives_at)
+        mlflow.log_metric('catched_' + str(number_of_positives), positives_at)
