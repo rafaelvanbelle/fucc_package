@@ -127,7 +127,7 @@ def log_performance(y_true, y_pred_proba, images_path, name,  log_with_mlflow=Fa
     ax = plot_cumulative_gain(y_true, y_pred_proba)
     fig = plt.gcf()
     plt.savefig(os.path.join(images_path, '_'.join([str(name), 'CumulativeGainsChart.pdf'])))
-    if mlflow:
+    if log_with_mlflow:
         mlflow.log_artifact(os.path.join(images_path, '_'.join([str(name), 'CumulativeGainsChart.pdf'])))
 
     optimal_threshold, optimal_f1_score = get_optimal_f1_cutoff(y_true, y_pred_proba)
