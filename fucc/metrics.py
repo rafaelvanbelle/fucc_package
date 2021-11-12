@@ -117,6 +117,8 @@ def get_true_positives_at(y_true, y_pred_proba, number_of_positives = 1000):
     
 def log_performance(y_true, y_pred_proba, images_path, name,  log_with_mlflow=False, number_of_positives=300):
 
+    performance_dict = {}
+
     # plot ap curve
     fig = plot_ap(y_true, y_pred_proba)
     plt.savefig(os.path.join(images_path, '_'.join([str(name), 'PRAUCcurve.pdf'])))
@@ -127,13 +129,16 @@ def log_performance(y_true, y_pred_proba, images_path, name,  log_with_mlflow=Fa
     ax = plot_cumulative_gain(y_true, y_pred_proba)
     fig = plt.gcf()
     plt.savefig(os.path.join(images_path, '_'.join([str(name), 'CumulativeGainsChart.pdf'])))
-    if mlflow:
+    if log_with_mlflow:
         mlflow.log_artifact(os.path.join(images_path, '_'.join([str(name), 'CumulativeGainsChart.pdf'])))
 
     optimal_threshold, optimal_f1_score = get_optimal_f1_cutoff(y_true, y_pred_proba)
     if log_with_mlflow:
         mlflow.log_metric('optimal_threshold', optimal_threshold)
         mlflow.log_metric('f1_score', optimal_f1_score)
+    
+    performance_dict['optimal_threshold'] = optimal_threshold
+    performance_dict['f1_score'] = optimal_f1_score
 
     # Lift scores
     percentiles = [0.05, 0.01, 0.001]
@@ -141,6 +146,7 @@ def log_performance(y_true, y_pred_proba, images_path, name,  log_with_mlflow=Fa
         lift_score = get_lift_score(y_true, y_pred_proba, percentile, optimal_threshold)
         if log_with_mlflow:
             mlflow.log_metric('lift_score_' + str(percentile), lift_score)
+        performance_dict['lift_score_'+ str(percentile)] = lift_score
     
     # confusion matrix
     cm = get_confusion_matrix(y_true, y_pred_proba, optimal_threshold)
@@ -150,11 +156,18 @@ def log_performance(y_true, y_pred_proba, images_path, name,  log_with_mlflow=Fa
         mlflow.log_metric('FN', cm[1,0])
         mlflow.log_metric('TP', cm[1,1])    
     
+    performance_dict['confusion_matrix/TN'] = cm[0,0]
+    performance_dict['confusion_matrix/FP'] = cm[0,1]
+    performance_dict['confusion_matrix/FN'] = cm[1,0]
+    performance_dict['confusion_matrix/TP'] = cm[1,1]
+    
 
     # partial ap
     partial_ap = get_partial_ap(y_true, y_pred_proba, number_of_positives)
     if log_with_mlflow:
         mlflow.log_metric('partial_ap', partial_ap)
+    
+    performance_dict['partial_ap'] = partial_ap
 
     fig = plot_partial_ap(y_true, y_pred_proba, number_of_positives)
     plt.savefig(os.path.join(images_path, '_'.join([str(name), 'PPRAUCcurve.pdf'])))
@@ -162,7 +175,12 @@ def log_performance(y_true, y_pred_proba, images_path, name,  log_with_mlflow=Fa
         mlflow.log_artifact(os.path.join(images_path, '_'.join([str(name), 'PPRAUCcurve.pdf'])))
 
 
+
     # catched@1000
     positives_at = get_true_positives_at(y_true, y_pred_proba, number_of_positives)
     if log_with_mlflow:
         mlflow.log_metric('catched_' + str(number_of_positives), positives_at)
+
+    performance_dict['catched_' + str(number_of_positives)] = positives_at
+
+    return performance_dict
