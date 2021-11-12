@@ -250,7 +250,7 @@ def _pagerank_processing(file):
                                   historical_data,
                                   t=t,
                                   lambd=lambd,
-                                  alpha=0.000085,
+                                  alpha=0.85,
                                   n_jobs=1)
         
 
