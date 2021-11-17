@@ -1,4 +1,4 @@
 build/
 dist/
 fucc.egg-info/
-__pychache__/
+fucc/__pychache__/

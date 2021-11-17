@@ -70,8 +70,8 @@ def get_threshold_and_cutoff_for_positives(y_true, y_pred_proba, number_of_posit
     precisions, recalls, thresholds = precision_recall_curve(y_true, y_pred_proba)
 
     # find threshold which coincides with the prefered alarm rate
-    for threshold in np.flipud(thresholds):
-        if (np.sum(y_pred_proba > threshold) >= number_of_positives):
+    for threshold in thresholds:
+        if (np.sum(y_pred_proba > threshold) <= number_of_positives):
             #print(threshold)
             f = threshold
             break
