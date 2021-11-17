@@ -16,10 +16,10 @@ class RollingWindowSplit():
         self.start_date = start_date
 
         # If these are specified, check they belong to the right type. 
-        if (train_size is not None) & (not isinstance(train_size, datetime.timedelta)):
-            raise TypeError('train_size should be datetime.timedelta')
-        if (test_size is not None ) & (not isinstance(test_size, datetime.timedelta)):
-            raise TypeError('test_size should be datetime.timedelta')
+        #if (train_size is not None) & (not isinstance(train_size, datetime.timedelta)):
+        #    raise TypeError('train_size should be datetime.timedelta')
+        #if (test_size is not None ) & (not isinstance(test_size, datetime.timedelta)):
+        #    raise TypeError('test_size should be datetime.timedelta')
 
 
     def split(self, X, y=None, timestamps=None):
@@ -64,3 +64,12 @@ class RollingWindowSplit():
                     indices[(timestamps > start_time) & (timestamps <= (start_time + self.test_size))])
                 # Update start_time
                 start_time += self.test_size
+
+    def number_of_splits(self, timestamps=None):
+        """Calculate the number of splits possible within the given dataset
+
+        Args:
+            timestamps ([type], optional): [description]. Defaults to None.
+        """
+
+        return np.floor((timestamps[-1] - self.start_date) / self.test_size)
