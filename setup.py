@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="fucc", 
-    version="0.0.6",
+    version="0.0.7",
     author="Rafael Van Belle",
     author_email="rafael@gmail.com",
     description="Fraudulent Use of Credit Card",
@@ -18,7 +18,6 @@ setuptools.setup(
           'pandas', 
           'tqdm', 
           'scikit-plot', 
-          'mlflow', 
           'matplotlib', 
           'networkx', 
           'dateparser'
