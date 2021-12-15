@@ -71,7 +71,7 @@ def get_threshold_and_cutoff_for_positives(y_true, y_pred_proba, number_of_posit
 
     # find threshold which coincides with the prefered alarm rate
     for threshold in thresholds:
-        if (np.sum(y_pred_proba > threshold) <= number_of_positives):
+        if (np.sum(y_pred_proba >= threshold) <= number_of_positives):
             #print(threshold)
             f = threshold
             break
