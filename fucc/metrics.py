@@ -1,7 +1,7 @@
 import os
 from scikitplot.helpers import cumulative_gain_curve
 import matplotlib.pyplot as plt
-from sklearn.metrics import f1_score, confusion_matrix, precision_recall_curve, average_precision_score, PrecisionRecallDisplay
+from sklearn.metrics import f1_score, confusion_matrix, precision_recall_curve, average_precision_score, PrecisionRecallDisplay, RocCurveDisplay, roc_curve
 import numpy as np
 #import mlflow
 
@@ -109,6 +109,16 @@ def plot_ap(y_true, y_pred_proba):
     disp = PrecisionRecallDisplay(precision=precision, recall=recall, average_precision = aps, estimator_name = None)
     disp.plot()
     return disp.figure_
+    
+def plot_roc(y_true, y_pred_proba):
+    fpr, tpr, _ = roc_curve(y_true, y_pred_proba)
+    disp = RocCurveDisplay(fpr = fpr, tpr = tpr)
+    disp.plot()
+    return disp.figure_
+
+
+
+
 
 def get_true_positives_at(y_true, y_pred_proba, number_of_positives = 1000):
     threshold, _ = get_threshold_and_cutoff_for_positives(y_true, y_pred_proba, number_of_positives)
@@ -124,6 +134,10 @@ def log_performance(y_true, y_pred_proba, images_path, name,  log_with_mlflow=Fa
     plt.savefig(os.path.join(images_path, '_'.join([str(name), 'PRAUCcurve.pdf'])))
     if log_with_mlflow:
         mlflow.log_artifact(os.path.join(images_path, '_'.join([str(name), 'PRAUCcurve.pdf'])))
+
+    # plot roc curve
+    fig = plot_roc(y_true, y_pred_proba)
+    plt.savefig(os.path.join(images_path, '_'.join([str(name), 'ROCcurve.pdf'])))
     
     # Cumulative gains cart
     ax = plot_cumulative_gain(y_true, y_pred_proba)
