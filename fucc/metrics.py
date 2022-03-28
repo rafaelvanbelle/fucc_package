@@ -141,12 +141,12 @@ def log_performance(y_true, y_pred_proba, images_path, name,  log_with_mlflow=Fa
     performance_dict['f1_score'] = optimal_f1_score
 
     # Lift scores
-    percentiles = [0.05, 0.01, 0.001]
-    for percentile in percentiles:
-        lift_score = get_lift_score(y_true, y_pred_proba, percentile, optimal_threshold)
-        if log_with_mlflow:
-            mlflow.log_metric('lift_score_' + str(percentile), lift_score)
-        performance_dict['lift_score_'+ str(percentile)] = lift_score
+    #percentiles = [0.05, 0.01, 0.001]
+    #for percentile in percentiles:
+    #    lift_score = get_lift_score(y_true, y_pred_proba, percentile, optimal_threshold)
+    #    if log_with_mlflow:
+    #        mlflow.log_metric('lift_score_' + str(percentile), lift_score)
+    #    performance_dict['lift_score_'+ str(percentile)] = lift_score
     
     # confusion matrix
     cm = get_confusion_matrix(y_true, y_pred_proba, optimal_threshold)
@@ -163,16 +163,16 @@ def log_performance(y_true, y_pred_proba, images_path, name,  log_with_mlflow=Fa
     
 
     # partial ap
-    partial_ap = get_partial_ap(y_true, y_pred_proba, number_of_positives)
-    if log_with_mlflow:
-        mlflow.log_metric('partial_ap', partial_ap)
+    #partial_ap = get_partial_ap(y_true, y_pred_proba, number_of_positives)
+    #if log_with_mlflow:
+    #    mlflow.log_metric('partial_ap', partial_ap)
     
-    performance_dict['partial_ap'] = partial_ap
+    #performance_dict['partial_ap'] = partial_ap
 
-    fig = plot_partial_ap(y_true, y_pred_proba, number_of_positives)
-    plt.savefig(os.path.join(images_path, '_'.join([str(name), 'PPRAUCcurve.pdf'])))
-    if log_with_mlflow:
-        mlflow.log_artifact(os.path.join(images_path, '_'.join([str(name), 'PPRAUCcurve.pdf'])))
+    #fig = plot_partial_ap(y_true, y_pred_proba, number_of_positives)
+    #plt.savefig(os.path.join(images_path, '_'.join([str(name), 'PPRAUCcurve.pdf'])))
+    #if log_with_mlflow:
+    #    mlflow.log_artifact(os.path.join(images_path, '_'.join([str(name), 'PPRAUCcurve.pdf'])))
 
 
 
