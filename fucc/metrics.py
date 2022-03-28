@@ -132,17 +132,21 @@ def log_performance(y_true, y_pred_proba, images_path, name,  log_with_mlflow=Fa
     # plot ap curve
     fig = plot_ap(y_true, y_pred_proba)
     plt.savefig(os.path.join(images_path, '_'.join([str(name), 'PRAUCcurve.pdf'])))
+    plt.savefig(os.path.join(images_path, '_'.join([str(name), 'PRAUCcurve.png'])))
     if log_with_mlflow:
         mlflow.log_artifact(os.path.join(images_path, '_'.join([str(name), 'PRAUCcurve.pdf'])))
 
     # plot roc curve
     fig = plot_roc(y_true, y_pred_proba)
     plt.savefig(os.path.join(images_path, '_'.join([str(name), 'ROCcurve.pdf'])))
+    plt.savefig(os.path.join(images_path, '_'.join([str(name), 'ROCcurve.png'])))
     
     # Cumulative gains cart
     ax = plot_cumulative_gain(y_true, y_pred_proba)
     fig = plt.gcf()
     plt.savefig(os.path.join(images_path, '_'.join([str(name), 'CumulativeGainsChart.pdf'])))
+    plt.savefig(os.path.join(images_path, '_'.join([str(name), 'CumulativeGainsChart.png'])))
+
     if log_with_mlflow:
         mlflow.log_artifact(os.path.join(images_path, '_'.join([str(name), 'CumulativeGainsChart.pdf'])))
 
