@@ -117,7 +117,23 @@ def plot_roc(y_true, y_pred_proba):
     return disp.figure_
 
 
-
+def calculate_revenues(y_true, y_pred_proba, tx_amounts, number_of_positives = 1000):
+    threshold, _ = get_threshold_and_cutoff_for_positives(y_true, y_pred_proba, number_of_positives)
+    y_pred = (y_pred_proba >= threshold)
+    
+    tp = (y_pred[y_true == True] == True)
+    fn = (y_pred[y_true == True] == False)
+    
+    # revenue of true positives
+    revenue_tp = (tp * tx_amounts[y_true]).sum()
+    
+    # revenue of false negatives
+    revenue_fn = (fn * tx_amounts[y_true]).sum()
+    
+    # total value of all fraud cases
+    revenue_p = tx_amounts[y_true].sum()
+    
+    return revenue_tp, revenue_fn, revenue_p
 
 
 def get_true_positives_at(y_true, y_pred_proba, number_of_positives = 1000):
