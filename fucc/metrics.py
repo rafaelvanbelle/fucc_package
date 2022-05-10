@@ -45,11 +45,18 @@ def get_confusion_matrix(y_true, y_pred_proba, threshold):
 def to_labels(pos_probs, threshold):
     return (pos_probs >= threshold).astype('int')
 
-def get_optimal_f1_cutoff(y_true, y_pred_proba, thresholds = np.arange(0,1, 0.001)):
-    scores = [f1_score(y_true, to_labels(y_pred_proba, t)) for t in thresholds]
-    ix = np.argmax(scores)
+def get_optimal_f1_cutoff(y_true, y_pred_proba): #, thresholds = np.arange(0,1, 0.001)):
+    precisions, recalls, thresholds = precision_recall_curve(y_true, y_pred_proba)
+    f1_scores = (2 * (precisions * recalls) / (precisions + recalls))
+    ix = np.argmax(f1_scores)
     optimal_threshold = thresholds[ix] 
-    optimal_f1_score = scores[ix] 
+    optimal_f1_score = f1_scores[ix] 
+
+    # too slow code below
+    #scores = [f1_score(y_true, to_labels(y_pred_proba, t)) for t in thresholds]
+    #ix = np.argmax(scores)
+    #optimal_threshold = thresholds[ix] 
+    #optimal_f1_score = scores[ix] 
     
     return optimal_threshold, optimal_f1_score
 
@@ -69,14 +76,18 @@ def get_lift_score(y_true, y_pred_proba, percentile, threshold):
 def get_threshold_and_cutoff_for_positives(y_true, y_pred_proba, number_of_positives = 1000):
     precisions, recalls, thresholds = precision_recall_curve(y_true, y_pred_proba)
 
+    f = 1
     # find threshold which coincides with the prefered alarm rate
     for threshold in thresholds:
         if (np.sum(y_pred_proba >= threshold) <= number_of_positives):
             #print(threshold)
             f = threshold
             break
-
-    cutoff = np.where(thresholds == f)[0][0]
+    
+    if f < 1:
+        cutoff = np.where(thresholds == f)[0][0]
+    else:
+        cutoff = None
     return threshold, cutoff
 
 def get_partial_ap(y_true, y_pred_proba, number_of_positives=1000):
@@ -146,6 +157,7 @@ def log_performance(y_true, y_pred_proba, images_path, name,  log_with_mlflow=Fa
     performance_dict = {}
 
     # plot ap curve
+    print("plot ap curve")
     fig = plot_ap(y_true, y_pred_proba)
     plt.savefig(os.path.join(images_path, '_'.join([str(name), 'PRAUCcurve.pdf'])))
     plt.savefig(os.path.join(images_path, '_'.join([str(name), 'PRAUCcurve.png'])))
@@ -153,11 +165,13 @@ def log_performance(y_true, y_pred_proba, images_path, name,  log_with_mlflow=Fa
         mlflow.log_artifact(os.path.join(images_path, '_'.join([str(name), 'PRAUCcurve.pdf'])))
 
     # plot roc curve
+    print("plot ROC curve")
     fig = plot_roc(y_true, y_pred_proba)
     plt.savefig(os.path.join(images_path, '_'.join([str(name), 'ROCcurve.pdf'])))
     plt.savefig(os.path.join(images_path, '_'.join([str(name), 'ROCcurve.png'])))
     
     # Cumulative gains cart
+    print("plot cgc curve")
     ax = plot_cumulative_gain(y_true, y_pred_proba)
     fig = plt.gcf()
     plt.savefig(os.path.join(images_path, '_'.join([str(name), 'CumulativeGainsChart.pdf'])))
@@ -166,6 +180,7 @@ def log_performance(y_true, y_pred_proba, images_path, name,  log_with_mlflow=Fa
     if log_with_mlflow:
         mlflow.log_artifact(os.path.join(images_path, '_'.join([str(name), 'CumulativeGainsChart.pdf'])))
 
+    print("get_optimal_f1")
     optimal_threshold, optimal_f1_score = get_optimal_f1_cutoff(y_true, y_pred_proba)
     if log_with_mlflow:
         mlflow.log_metric('optimal_threshold', optimal_threshold)
