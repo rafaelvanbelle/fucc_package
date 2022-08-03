@@ -10,7 +10,7 @@ import numpy as np
 
 def plot_cumulative_gain(y_true, y_proba, title_fontsize=15, text_fontsize=10):
     # Compute Cumulative Gain Curves
-    percentages, gains1 = cumulative_gain_curve(y_true, y_proba, True)
+    percentages, gains1 = cumulative_gain_curve(y_true, y_proba)
     
     # Best classifier
     #percentages, gains2 = cumulative_gain_curve(y_true, y_true, True)
@@ -48,7 +48,7 @@ def to_labels(pos_probs, threshold):
 def get_optimal_f1_cutoff(y_true, y_pred_proba): #, thresholds = np.arange(0,1, 0.001)):
     precisions, recalls, thresholds = precision_recall_curve(y_true, y_pred_proba)
     f1_scores = (2 * (precisions * recalls) / (precisions + recalls))
-    ix = np.argmax(f1_scores)
+    ix = np.nanargmax(f1_scores)
     optimal_threshold = thresholds[ix] 
     optimal_f1_score = f1_scores[ix] 
 
@@ -131,9 +131,11 @@ def plot_roc(y_true, y_pred_proba):
 def calculate_revenues(y_true, y_pred_proba, tx_amounts, number_of_positives = 1000):
     threshold, _ = get_threshold_and_cutoff_for_positives(y_true, y_pred_proba, number_of_positives)
     y_pred = (y_pred_proba >= threshold)
+    # turn y_true into boolean array
+    y_true = (y_true == True)
     
-    tp = (y_pred[y_true == True] == True)
-    fn = (y_pred[y_true == True] == False)
+    tp = (y_pred[y_true == True] == True).flatten()
+    fn = (y_pred[y_true == True] == False).flatten()
     
     # revenue of true positives
     revenue_tp = (tp * tx_amounts[y_true]).sum()
