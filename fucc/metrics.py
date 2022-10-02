@@ -76,18 +76,26 @@ def get_lift_score(y_true, y_pred_proba, percentile, threshold):
 def get_threshold_and_cutoff_for_positives(y_true, y_pred_proba, number_of_positives = 1000):
     precisions, recalls, thresholds = precision_recall_curve(y_true, y_pred_proba)
 
-    f = 1
-    # find threshold which coincides with the prefered alarm rate
-    for threshold in thresholds:
-        if (np.sum(y_pred_proba >= threshold) <= number_of_positives):
-            #print(threshold)
-            f = threshold
-            break
+    # SKlearn documentation states that n_thresholds = len(np.unique(probas_pred)). 
+    # Hence, each threshold will result in one extra observation being classified as positive.
+    # The thresholds are ordered from low to high
+
+    threshold = thresholds[-number_of_positives]
+    cutoff = number_of_positives
+
     
-    if f < 1:
-        cutoff = np.where(thresholds == f)[0][0]
-    else:
-        cutoff = None
+    #f = 1
+    # find threshold which coincides with the prefered alarm rate
+    #for threshold in thresholds:
+     #   if (np.sum(y_pred_proba >= threshold) <= number_of_positives):
+     #       #print(threshold)
+    #        f = threshold
+     #       break
+    #
+    #if f < 1:
+    #    cutoff = np.where(thresholds == f)[0][0]
+    #else:
+    #    cutoff = None
     return threshold, cutoff
 
 def get_partial_ap(y_true, y_pred_proba, number_of_positives=1000):
