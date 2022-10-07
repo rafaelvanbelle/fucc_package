@@ -1,3 +1,4 @@
+from inspect import indentsize
 import os
 from scikitplot.helpers import cumulative_gain_curve
 import matplotlib.pyplot as plt
@@ -79,8 +80,8 @@ def get_threshold_and_cutoff_for_positives(y_true, y_pred_proba, number_of_posit
     # SKlearn documentation states that n_thresholds = len(np.unique(probas_pred)). 
     # Hence, each threshold will result in one extra observation being classified as positive.
     # The thresholds are ordered from low to high
-
-    threshold = thresholds[-number_of_positives]
+    ind = np.min([len(thresholds), number_of_positives])
+    threshold = thresholds[-ind]
     cutoff = number_of_positives
 
     
