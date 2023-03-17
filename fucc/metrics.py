@@ -172,8 +172,8 @@ def log_performance(y_true, y_pred_proba, images_path, name,  log_with_mlflow=Fa
     fig = plot_ap(y_true, y_pred_proba)
     plt.savefig(os.path.join(images_path, '_'.join([str(name), 'PRAUCcurve.pdf'])))
     plt.savefig(os.path.join(images_path, '_'.join([str(name), 'PRAUCcurve.png'])))
-    if log_with_mlflow:
-        mlflow.log_artifact(os.path.join(images_path, '_'.join([str(name), 'PRAUCcurve.pdf'])))
+    #if log_with_mlflow:
+        #mlflow.log_artifact(os.path.join(images_path, '_'.join([str(name), 'PRAUCcurve.pdf'])))
 
     # plot roc curve
     print("plot ROC curve")
@@ -188,14 +188,14 @@ def log_performance(y_true, y_pred_proba, images_path, name,  log_with_mlflow=Fa
     plt.savefig(os.path.join(images_path, '_'.join([str(name), 'CumulativeGainsChart.pdf'])))
     plt.savefig(os.path.join(images_path, '_'.join([str(name), 'CumulativeGainsChart.png'])))
 
-    if log_with_mlflow:
-        mlflow.log_artifact(os.path.join(images_path, '_'.join([str(name), 'CumulativeGainsChart.pdf'])))
+    #if log_with_mlflow:
+        #mlflow.log_artifact(os.path.join(images_path, '_'.join([str(name), 'CumulativeGainsChart.pdf'])))
 
     print("get_optimal_f1")
     optimal_threshold, optimal_f1_score = get_optimal_f1_cutoff(y_true, y_pred_proba)
-    if log_with_mlflow:
-        mlflow.log_metric('optimal_threshold', optimal_threshold)
-        mlflow.log_metric('f1_score', optimal_f1_score)
+    #if log_with_mlflow:
+        #mlflow.log_metric('optimal_threshold', optimal_threshold)
+        #mlflow.log_metric('f1_score', optimal_f1_score)
     
     performance_dict['optimal_threshold'] = optimal_threshold
     performance_dict['f1_score'] = optimal_f1_score
@@ -210,11 +210,11 @@ def log_performance(y_true, y_pred_proba, images_path, name,  log_with_mlflow=Fa
     
     # confusion matrix
     cm = get_confusion_matrix(y_true, y_pred_proba, optimal_threshold)
-    if log_with_mlflow:
-        mlflow.log_metric('TN', cm[0,0])
-        mlflow.log_metric('FP', cm[0,1])
-        mlflow.log_metric('FN', cm[1,0])
-        mlflow.log_metric('TP', cm[1,1])    
+    #if log_with_mlflow:
+        #mlflow.log_metric('TN', cm[0,0])
+        #mlflow.log_metric('FP', cm[0,1])
+        #mlflow.log_metric('FN', cm[1,0])
+        #mlflow.log_metric('TP', cm[1,1])    
     
     performance_dict['confusion_matrix/TN'] = cm[0,0]
     performance_dict['confusion_matrix/FP'] = cm[0,1]
@@ -238,8 +238,8 @@ def log_performance(y_true, y_pred_proba, images_path, name,  log_with_mlflow=Fa
 
     # catched@1000
     positives_at = get_true_positives_at(y_true, y_pred_proba, number_of_positives)
-    if log_with_mlflow:
-        mlflow.log_metric('catched_' + str(number_of_positives), positives_at)
+    #if log_with_mlflow:
+        #mlflow.log_metric('catched_' + str(number_of_positives), positives_at)
 
     performance_dict['catched_' + str(number_of_positives)] = positives_at
 
